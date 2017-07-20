@@ -1,0 +1,7 @@
+This is text in the included section.
+
+!bc
+some code as well
+!ec
+
+And more text after the code.

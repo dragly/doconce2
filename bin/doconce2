@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+import argparse
+from doconce2.parsers import structure
+from doconce2.parsers import markdown
+from pprint import pprint
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(dest="subparser_name")
+
+format_parser = subparsers.add_parser("format")
+format_parser.add_argument("format")
+format_parser.add_argument("filename")
+args = parser.parse_args()
+
+
+def replace_node_children(node, scope, callback):
+    if "children" in node:
+        children = node["children"]
+        for i, child in enumerate(children):
+            replace_node_children(
+                child,
+                scope + [child["type"]],
+                callback
+            )
+            children[i] = callback(child)
+
+def replace_document_nodes(document, callback):
+    scope = ["file"]
+    body = document["body"]
+    for i, block in enumerate(body):
+        replace_node_children(
+            block,
+            scope + [block["type"]],
+            callback
+        )
+        body[i] = callback(block)
+
+
+if args.subparser_name == "format":
+    if args.format == "ipynb":
+        document = structure.parse_file(args.filename)
+        document = structure.parse_includes(document)
+        document = structure.parse_blocks(document)
+        # document = markdown.parse_document_markdown(document)
+
+        # for part in structure.document_strings(document):
+            # part = markdown.parse_markdown(part["string"], offset=part["location"])
+        def node_action(node):
+            if node["type"] == "string":
+                print(markdown.parse_markdown(node["string"]))
+                return markdown.parse_markdown(node["string"])
+            return node
+
+        replace_document_nodes(document, node_action)
+        pprint(document)
+
+        # structure.document_replace(
+        #     document,
+        #     lambda part: markdown.parse_markdown(part["string"], offset=part["location"])
+        # )
+
+
+
+        # pprint(document)
+        # pprint(document)
+
+        # pprint(document)

@@ -1,0 +1,14 @@
+---
+title: My book
+authors: Author Authorson
+---
+
+This is some introductory text.
+
+!include(chapter1/chapter1.doconce)
+
+Some text in between.
+
+!include(chapter2/chapter2.doconce)
+
+Some more text following the include.
