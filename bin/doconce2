@@ -4,22 +4,11 @@ import argparse
 from pprint import pprint
 import sys
 
+from doconce2.core.processor import Processor, solve_dependencies
 from doconce2.parsers import structure
 from doconce2.parsers import markdown
 from doconce2 import utils
-
-
-class Processor:
-    def __init__(self, name, function, dependencies):
-        self.name = name
-        self.function = function
-        self.dependencies = set(dependencies)
-
-    def __repr__(self):
-        return self.name
-        
-def dummy(document):
-    pass
+from doconce2 import plugin_source
 
 def main():
     parser = argparse.ArgumentParser()
@@ -30,6 +19,11 @@ def main():
     format_parser.add_argument("filename")
     args = parser.parse_args()
 
+    available_processors = []
+
+    for plugin_name in plugin_source.list_plugins():
+        plugin = plugin_source.load_plugin(plugin_name)
+        available_processors += plugin.setup_processors()
 
     if args.subparser_name == "format":
         if args.format == "ipynb":
@@ -41,90 +35,20 @@ def main():
         elif args.format == "test":
             document = structure.parse_file(args.filename)
 
-            includes_processor = Processor(
-                name="includes",
-                function=structure.process_includes,
-                dependencies=[]
-            )
-            blocks_processor = Processor(
-                name="blocks",
-                function=structure.process_blocks,
-                dependencies=["includes"]
-            )
-            markdown_processor = Processor(
-                name="markdown",
-                function=markdown.process_markdown,
-                dependencies=["blocks"]
-            )
-
-            available_processors = [
-                markdown_processor,
-                includes_processor,
-                blocks_processor,
-            ]
-
             enabled_processors = [
-                "markdown"
+                "core"
             ]
 
-            processor_map = {}
-            dependency_map = {}
-            for processor in available_processors:
-                processor_map[processor.name] = processor
-                dependency_map[processor.name] = processor.dependencies
-            
-            queue = set(enabled_processors)
-            needed_processors = set()
-            while queue:
-                new_queue = set()
-                for name in queue:
-                    for dependency in dependency_map[name]:
-                        new_queue.add(dependency)
-                    needed_processors.add(name)
-                queue = new_queue
-                    
-            
-            # remove missing processors from maps
-            processor_map = dict(
-                (name, v)
-                for name, v in processor_map.items()
-                if name in needed_processors
+            processors = solve_dependencies(
+                available_processors,
+                enabled_processors
             )
-            dependency_map = dict(
-                (name, v)
-                for name, v in dependency_map.items()
-                if name in needed_processors
-            )
-            
-            ordered_processors = []
-            while dependency_map:
-                ready = [
-                    name
-                    for name, dependencies in dependency_map.items()
-                    if not dependencies
-                ]
 
-                if not ready:
-                    raise ValueError("Circular dependency found!")
-
-                for name in ready:
-                    del dependency_map[name]
-
-                for dependencies in dependency_map.values():
-                    dependencies.difference_update(ready)
-
-                for name in ready:
-                    ordered_processors.append(processor_map[name])
-
-            for processor in ordered_processors:
+            for processor in processors:
                 processor.function(document)
-                    
-
 
             pprint(document)
-            # pprint(document)
 
-            # pprint(document)
     return 0
 
 if __name__ == "__main__":
