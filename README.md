@@ -1,4 +1,4 @@
-# Doconce 2.0 #
+# DocOnce sandbox for version 2.0 #
 
 WARNING: This is not a final revision of DocOnce 2.0!
 

@@ -66,14 +66,15 @@ def document_replace(document, callback):
                     children[j] = callback(child)
 
 
-def parse_includes(document):
+def process_includes(document):
     current_directory = os.path.dirname(document["filename"])
 
     def handle_file(result):
         file_data = parse_file(
             os.path.join(current_directory, result["filename"])
         )
-        return parse_includes(file_data)
+        process_includes(file_data)
+        return file_data
 
     def keep_string(string, location, result):
         return {
@@ -105,7 +106,6 @@ def parse_includes(document):
                 for subpart in document_strings(group):
                     new_body.append(subpart)
     document["body"] = new_body
-    return document
 
 
 def create_block_parser(extra_tokens=None):
@@ -120,7 +120,7 @@ def create_block_parser(extra_tokens=None):
     return pp.ZeroOrMore(all_tokens)
 
 
-def parse_blocks(document, extra_tokens=None):
+def process_blocks(document, extra_tokens=None):
     parser = create_block_parser(extra_tokens=extra_tokens)
 
     new_body = []
@@ -135,5 +135,3 @@ def parse_blocks(document, extra_tokens=None):
             new_body.append(part)
 
     document["body"] = new_body
-
-    return document

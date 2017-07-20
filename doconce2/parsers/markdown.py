@@ -1,5 +1,6 @@
 import pyparsing as pp
 from pprint import pprint
+from .. import utils
 
 def parse_markdown(string, offset=0):
     italics = (
@@ -64,3 +65,11 @@ def parse_markdown(string, offset=0):
 
 # result = parse_markdown("Dette er noe *kursiv tekst, _som_ er _fet_* og _kan_ ha *flere(!) deler*")
 # pprint(result)
+
+def process_markdown(document):
+    def node_action(node):
+        if node["type"] == "string":
+            return parse_markdown(node["string"])
+        return [node]
+
+    return utils.nodes.replace_document_nodes(document, node_action)
