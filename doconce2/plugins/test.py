@@ -1,5 +1,7 @@
-from doconce2.core.processor import Processor
 import pyparsing as pp
+
+from doconce2.core.processor import Processor
+
 
 def setup_processors():
     return [
@@ -10,11 +12,12 @@ def setup_processors():
         )
     ]
 
+
 def setup_blocks():
     prefix_name = pp.Word(pp.alphanums)
     suffix_name = pp.matchPreviousLiteral(prefix_name)
-    prefix = pp.Combine(pp.Literal("$begin") + prefix_name)
-    suffix = pp.Combine(pp.Literal("$end") + suffix_name)
+    prefix = pp.Combine(pp.Literal("$begin ") + prefix_name)
+    suffix = pp.Combine(pp.Literal("$end ") + suffix_name)
 
     environment = (
         prefix("prefix") + pp.SkipTo(pp.lineEnd) + pp.LineEnd() +
@@ -27,6 +30,8 @@ def setup_blocks():
         "suffix": result["suffix"],
         "location": location
     })
+
+    environment.setDebug()
 
     return [
         environment

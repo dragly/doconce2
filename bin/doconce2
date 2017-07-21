@@ -36,8 +36,7 @@ def main():
             extra_tokens += plugin.setup_blocks()
 
     def process_blocks(document):
-        # structure.process_blocks(document, extra_tokens=extra_tokens)
-        structure.process_blocks(document)
+        structure.process_blocks(document, extra_tokens=extra_tokens)
 
     blocks_processor = Processor(
         name="blocks",

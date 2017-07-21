@@ -115,7 +115,8 @@ def process_blocks(document, extra_tokens=None):
         tokens.heading.heading
     )
     if extra_tokens is not None:
-        all_tokens = all_tokens | extra_tokens
+        for token in extra_tokens:
+            all_tokens = all_tokens | token
     all_tokens = all_tokens | tokens.paragraph.paragraph
 
     parser = pp.ZeroOrMore(all_tokens)

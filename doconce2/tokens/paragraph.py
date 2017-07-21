@@ -11,3 +11,4 @@ paragraph = paragraph.setParseAction(lambda string, location, result: {
     }],
     "location": location
 })
+paragraph.setDebug()
