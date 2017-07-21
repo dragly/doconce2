@@ -35,12 +35,9 @@ def main():
         if hasattr(plugin, "setup_blocks"):
             extra_tokens += plugin.setup_blocks()
 
-    def process_blocks(document):
-        structure.process_blocks(document, extra_tokens=extra_tokens)
-
     blocks_processor = Processor(
         name="blocks",
-        function=process_blocks,
+        function=lambda document: structure.process_blocks(document, extra_tokens=extra_tokens),
         dependencies=["includes"]
     )
 
