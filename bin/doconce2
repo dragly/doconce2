@@ -26,13 +26,13 @@ def main():
         available_processors += plugin.setup_processors()
 
     if args.subparser_name == "format":
-        if args.format == "ipynb":
+        if args.format == "procedural":
             document = structure.parse_file(args.filename)
             structure.process_includes(document)
             structure.process_blocks(document)
             markdown.process_markdown(document)
             pprint(document)
-        elif args.format == "test":
+        elif args.format == "deptree":
             document = structure.parse_file(args.filename)
 
             enabled_processors = [
