@@ -19,11 +19,36 @@ def main():
     format_parser.add_argument("filename")
     args = parser.parse_args()
 
+    includes_processor = Processor(
+        name="includes",
+        function=structure.process_includes,
+        dependencies=[]
+    )
+
     available_processors = []
+    extra_tokens = []
 
     for plugin_name in plugin_source.list_plugins():
         plugin = plugin_source.load_plugin(plugin_name)
-        available_processors += plugin.setup_processors()
+        if hasattr(plugin, "setup_processors"):
+            available_processors += plugin.setup_processors()
+        if hasattr(plugin, "setup_blocks"):
+            extra_tokens += plugin.setup_blocks()
+
+    def process_blocks(document):
+        # structure.process_blocks(document, extra_tokens=extra_tokens)
+        structure.process_blocks(document)
+
+    blocks_processor = Processor(
+        name="blocks",
+        function=process_blocks,
+        dependencies=["includes"]
+    )
+
+    available_processors += [
+        includes_processor,
+        blocks_processor
+    ]
 
     if args.subparser_name == "format":
         if args.format == "procedural":

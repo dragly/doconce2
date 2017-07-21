@@ -108,7 +108,7 @@ def process_includes(document):
     document["body"] = new_body
 
 
-def create_block_parser(extra_tokens=None):
+def process_blocks(document, extra_tokens=None):
     all_tokens = (
         pp.White().suppress() |
         tokens.environment.environment |
@@ -117,11 +117,8 @@ def create_block_parser(extra_tokens=None):
     if extra_tokens is not None:
         all_tokens = all_tokens | extra_tokens
     all_tokens = all_tokens | tokens.paragraph.paragraph
-    return pp.ZeroOrMore(all_tokens)
 
-
-def process_blocks(document, extra_tokens=None):
-    parser = create_block_parser(extra_tokens=extra_tokens)
+    parser = pp.ZeroOrMore(all_tokens)
 
     new_body = []
     for part in document["body"]:
